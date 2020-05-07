@@ -87,49 +87,49 @@ function App() {
       if (localStorage.getItem("ACCESS_TOKEN")) {
         setUser("admin");
         await axios.get("/admin/check_token");
-      }
 
-      const result = await axios.get(
-        "/departments?non_accept=1&included_request=1"
-      );
-      const resultHospital = await axios.get("/hospitals/non_accepts/0");
-      const resultRequest = await axios.get("/requests/name");
-      const resultReserveAndMaker = await axios.get("/reserves/for_admin");
-
-      const mapResultRequest = resultRequest.data?.map((row) => {
-        const dataDate = row.createdAt.split("T", 1).toString();
-        return {
-          id: row.id,
-          requestAmount: row.request_amount,
-          reserveAmount: row.reserve_amount,
-          deliveredAmount: row.delivered_amount,
-          hospital: row.MedicalStaff.Hospital.hospital,
-          date: dataDate,
-          isUrgent: row.isUrgent,
-        };
-      });
-
-      for (let row of resultReserveAndMaker.data) {
-        let date = new Date();
-        let date2 = new Date(row.createdAt);
-        let diffTime = Math.abs(date - date2);
-        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        row.createdAt = date2;
-        row.diffDays = diffDays;
-        row.dayNow = date;
-        row.delete = (
-          <CancelReserve id={row.id} deleteReserve={deleteReserve} />
+        const result = await axios.get(
+          "/departments?non_accept=1&included_request=1"
         );
-      }
+        const resultHospital = await axios.get("/hospitals/non_accepts/0");
+        const resultRequest = await axios.get("/requests/name");
+        const resultReserveAndMaker = await axios.get("/reserves/for_admin");
 
-      resultReserveAndMaker.data.sort((a, b) => {
-        return b.diffDays - a.diffDays;
-      });
-      console.log(resultReserveAndMaker.data);
-      setReserve(resultReserveAndMaker.data);
-      setDepartment(result.data);
-      setHospital(resultHospital.data);
-      setRequest(mapResultRequest);
+        const mapResultRequest = resultRequest.data?.map((row) => {
+          const dataDate = row.createdAt.split("T", 1).toString();
+          return {
+            id: row.id,
+            requestAmount: row.request_amount,
+            reserveAmount: row.reserve_amount,
+            deliveredAmount: row.delivered_amount,
+            hospital: row.MedicalStaff.Hospital.hospital,
+            date: dataDate,
+            isUrgent: row.isUrgent,
+          };
+        });
+
+        for (let row of resultReserveAndMaker.data) {
+          let date = new Date();
+          let date2 = new Date(row.createdAt);
+          let diffTime = Math.abs(date - date2);
+          let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          row.createdAt = date2;
+          row.diffDays = diffDays;
+          row.dayNow = date;
+          row.delete = (
+            <CancelReserve id={row.id} deleteReserve={deleteReserve} />
+          );
+        }
+
+        resultReserveAndMaker.data.sort((a, b) => {
+          return b.diffDays - a.diffDays;
+        });
+        console.log(resultReserveAndMaker.data);
+        setReserve(resultReserveAndMaker.data);
+        setDepartment(result.data);
+        setHospital(resultHospital.data);
+        setRequest(mapResultRequest);
+      }
     };
     fetchData();
   }, []);
