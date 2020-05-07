@@ -45,13 +45,11 @@ function HospitalName(props) {
       await axios.put(
         `/medical-staff/hospital_id?id_new=${id}&id_old=${props.id}`
       );
-      console.log("above delete");
+
       await axios.delete(`/hospitals?id=${props.id}`);
-      console.log("down delete");
+
       props.fetchDataHospital();
-      console.log("in if id !==0");
     } else if (id === 0) {
-      console.log(id);
       setId(props.id);
     }
   };
@@ -66,6 +64,9 @@ function HospitalName(props) {
 
   const onKeyDownInput = (e) => {
     if (e.key === "Enter" || e.key === "Escape") {
+      if (hospital == "") {
+        setHospital(props.hospital);
+      }
       setToInput(false);
     }
   };

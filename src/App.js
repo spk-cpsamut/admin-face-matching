@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+
 import "antd/dist/antd.css";
 import "./css/hospital.css";
 import { Switch, Route, Redirect } from "react-router-dom";
@@ -7,12 +7,15 @@ import Role from "./config/Role";
 import axios from "./config/axios";
 import Nav from "./components/Nav";
 import _ from "lodash";
+import { Button, Modal } from "antd";
+import CancelReserve from "./components/Reserve/CancelReserve";
 
 function App() {
   const [user, setUser] = useState("guest");
   const [department, setDepartment] = useState();
   const [hospital, setHospital] = useState();
   const [request, setRequest] = useState();
+  const [reserve, setReserve] = useState();
 
   const [indexDefaultFilter, setIndexDefaultFilter] = useState(0);
 
@@ -56,6 +59,29 @@ function App() {
     }
   };
 
+  const fetchDataReserve = async () => {
+    const resultReserveAndMaker = await axios.get("/reserves/for_admin");
+    for (let row of resultReserveAndMaker.data) {
+      let date = new Date();
+      let date2 = new Date(row.createdAt);
+      let diffTime = Math.abs(date - date2);
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      row.createdAt = date2;
+      row.diffDays = diffDays;
+      row.dayNow = date;
+      row.delete = <CancelReserve id={row.id} deleteReserve={deleteReserve} />;
+    }
+    resultReserveAndMaker.data.sort((a, b) => {
+      return b.diffDays - a.diffDays;
+    });
+    setReserve(resultReserveAndMaker.data);
+  };
+
+  const deleteReserve = async (idReserve) => {
+    await axios.delete(`/reserves/${idReserve}`);
+    fetchDataReserve();
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (localStorage.getItem("ACCESS_TOKEN")) {
@@ -67,7 +93,8 @@ function App() {
         "/departments?non_accept=1&included_request=1"
       );
       const resultHospital = await axios.get("/hospitals/non_accepts/0");
-      const resultRequest = await axios.get("requests/name");
+      const resultRequest = await axios.get("/requests/name");
+      const resultReserveAndMaker = await axios.get("/reserves/for_admin");
 
       const mapResultRequest = resultRequest.data?.map((row) => {
         const dataDate = row.createdAt.split("T", 1).toString();
@@ -82,6 +109,24 @@ function App() {
         };
       });
 
+      for (let row of resultReserveAndMaker.data) {
+        let date = new Date();
+        let date2 = new Date(row.createdAt);
+        let diffTime = Math.abs(date - date2);
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        row.createdAt = date2;
+        row.diffDays = diffDays;
+        row.dayNow = date;
+        row.delete = (
+          <CancelReserve id={row.id} deleteReserve={deleteReserve} />
+        );
+      }
+
+      resultReserveAndMaker.data.sort((a, b) => {
+        return b.diffDays - a.diffDays;
+      });
+      console.log(resultReserveAndMaker.data);
+      setReserve(resultReserveAndMaker.data);
       setDepartment(result.data);
       setHospital(resultHospital.data);
       setRequest(mapResultRequest);
@@ -110,6 +155,8 @@ function App() {
                 ///////////////
                 setIndexDefaultFilter={setIndexDefaultFilter}
                 indexDefaultFilter={indexDefaultFilter}
+                /////////
+                reserve={reserve}
               />
             </Route>
           );
