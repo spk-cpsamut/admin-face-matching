@@ -29,8 +29,8 @@ function Login(props) {
       .post(`/admin/login`, body)
       .then((result) => {
         console.log("pass then");
-        props.setUser("admin");
         localStorage.setItem("ACCESS_TOKEN", result.data);
+        props.setUser("admin");
       })
       .catch((err) => {
         console.log("username or password is incorrect");

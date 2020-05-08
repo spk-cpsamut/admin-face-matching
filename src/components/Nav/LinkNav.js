@@ -25,6 +25,11 @@ export default function LinkNav() {
     setAtReserve(1);
   };
 
+  const logout = () => {
+    localStorage.removeItem("ACCESS_TOKEN");
+    window.location.reload();
+  };
+
   const buttonNav = ["button-nav", "button-nav-Click"];
   return (
     <Row style={{ width: "100%" }}>
@@ -47,6 +52,13 @@ export default function LinkNav() {
         <Button className={buttonNav[atReserve]} onClick={onClickReserve}>
           <Link to="/reserve"> Reserve</Link>
         </Button>
+      </Col>
+      <Col span={11}></Col>
+      <Col>
+        {" "}
+        <div onClick={logout}>
+          <Link to="/login">Logout</Link>
+        </div>
       </Col>
     </Row>
   );

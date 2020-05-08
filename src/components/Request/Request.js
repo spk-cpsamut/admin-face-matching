@@ -77,7 +77,7 @@ function Request(props) {
         setIndexDefaultFilter={props.setIndexDefaultFilter}
         indexDefaultFilter={props.indexDefaultFilter}
       />
-      <Table dataSource={request} columns={columns} key={_.uniqueId()} />
+      <Table dataSource={data} columns={columns} key={_.uniqueId()} />
     </div>
   );
 }
